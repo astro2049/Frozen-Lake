@@ -250,6 +250,32 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
         value = np.array(value, dtype=np.float)
 
     # TODO:
+    local_iterations = 0
+    while local_iterations <= max_iterations:
+        delta = 0
+
+        # Loop through each state
+        for state in range(env.n_states):
+            # Old state value
+            State_Value = value[state]
+            Policy_of_State = np.zeros(env.n_actions).tolist()
+            # New state value = max of q-value
+            for action in range(env.n_actions):
+                for state_ in range(env.n_states):
+                    Policy_of_State[action] = sum(
+                        [env.p(state_, state, action)] * (env.r(state_, state, action)) + gamma * value[state_])
+
+            value[state] = max(Policy_of_State)
+            # Calculating delta
+            delta = max(delta, abs(value[state] - State_Value))
+
+        # Stop if state values changes are smaller than theta or itereations are greater than max iterations
+        if delta < theta:
+            break
+        local_iterations += 1
+
+    # Extract policy with optimal state values
+    policy = env.policy_improvement(env, value, gamma)
 
     return policy, value
 
