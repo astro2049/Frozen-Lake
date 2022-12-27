@@ -92,6 +92,14 @@ class FrozenLake(Environment):
         self.absorbing_state = n_states - 1
 
         # TODO:
+        self.Hole_States = []
+        i = 0
+        while i <= len(self.lake_flat):
+            if self.lake_flat[i] == '#':
+                self.Hole_States.append(i)
+            i += 1
+        self.Goal_State = np.where(self.lake_flat == '$')
+        self.Start_State = np.where(self.lake_flat == '&')
 
         Environment.__init__(self, n_states, n_actions, max_steps, pi, seed=seed)
 
@@ -109,6 +117,10 @@ class FrozenLake(Environment):
     def r(self, next_state, state, action):
 
     # TODO:
+        if state == self.Goal_State(state):
+            return 1
+        else:
+            return 0
 
     def render(self, policy=None, value=None):
         if policy is None:
