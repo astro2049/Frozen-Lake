@@ -198,6 +198,20 @@ def policy_improvement(env, value, gamma):
     policy = np.zeros(env.n_states, dtype=int)
 
     # TODO:
+    # Each state
+    for state in range(env.n_states):
+        Policy_of_State = np.zeros(env.n_actions).tolist()
+
+        # Each action
+        for action in range(env.n_actions):
+            # All possible next states from this state-action pair
+            for state_ in range(env.n_states):
+                Policy_of_State[action] = sum(
+                    [env.p(state_, state, action)] * (env.r(state_, state, action)) + gamma * value[state_])
+                # This state
+        # Maximum policy
+        policy[state] = Policy_of_State.index(max(Policy_of_State))
+    # Set new policy to this action that maximizes policy
 
     return policy
 
