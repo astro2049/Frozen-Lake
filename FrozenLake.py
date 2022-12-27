@@ -111,12 +111,30 @@ class FrozenLake(Environment):
         return state, reward, done
 
     def p(self, next_state, state, action):
+        # TODO:
+        # slipping not considered
+        if action == 0:
+            state -= 4
+            if state < 0:
+                state += 4
+        elif action == 1:
+            if state % 4 != 0:
+                state -= 1
+        elif action == 2:
+            state += 4
+            if state > 15:
+                state -= 4
+        elif action == 3:
+            if state % 4 != 3:
+                state += 1
 
-    # TODO:
+        if next_state == state:
+            return 1
+        else:
+            return 0
 
     def r(self, next_state, state, action):
-
-    # TODO:
+        # TODO:
         if state == self.Goal_State(state):
             return 1
         else:
