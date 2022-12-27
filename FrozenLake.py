@@ -169,6 +169,27 @@ def policy_evaluation(env, policy, gamma, theta, max_iterations):
     value = np.zeros(env.n_states, dtype=np.float)
 
     # TODO:
+    # Loop until delta < theta or iteration < max iterations.
+    local_iterations = 0
+    while local_iterations <= max_iterations:
+        delta = 0
+
+        # Loop through states
+        for state in range(env.n_states):
+            action = policy[state]
+            State_Value = value[state]
+
+            # Sum of value
+            for state_ in range(env.n_states):
+                value[state] = sum(
+                    [env.p(state_, state, action)] * (env.r(state_, state, action)) + gamma * value[state_])
+                # Calculating delta
+                delta = max(delta, np.abs(State_Value - value[state]))
+
+        # Stop policy evaluation if state values changes are smaller than theta or itereations are greater than max iterations
+        if delta < theta:
+            break
+        local_iterations += 1
 
     return value
 
