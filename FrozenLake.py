@@ -107,26 +107,39 @@ class FrozenLake(Environment):
 
     def p(self, next_state, state, action):
         # TODO:
-        # slipping not considered
-        if action == 0:
-            state -= 4
-            if state < 0:
-                state += 4
-        elif action == 1:
-            if state % 4 != 0:
-                state -= 1
-        elif action == 2:
-            state += 4
-            if state > 15:
-                state -= 4
-        elif action == 3:
-            if state % 4 != 3:
-                state += 1
-
-        if next_state == state:
-            return 1
+        if state == self.absorbing_state:
+            return state == next_state
+        elif np.isin(state, self.hole_states) or state == self.goal_state:
+            return next_state == self.absorbing_state
         else:
-            return 0
+            if action == 0:
+                state -= 4
+                if state < 0:
+                    state += 4
+            elif action == 1:
+                if state % 4 != 0:
+                    state -= 1
+            elif action == 2:
+                state += 4
+                if state > 15:
+                    state -= 4
+            elif action == 3:
+                if state % 4 != 3:
+                    state += 1
+
+            if next_state == state:
+                return 1 - self.slip
+            else:
+                val = 0
+                slips = []
+                slips.append(state) if state - 4 < 0 else slips.append(state - 4)
+                slips.append(state) if state % 4 == 0 else slips.append(state - 1)
+                slips.append(state) if state + 4 > 15 else slips.append(state + 4)
+                slips.append(state) if state % 4 == 3 else slips.append(state + 1)
+                for s in slips:
+                    if next_state == s:
+                        val += self.slip / 4
+                return val
 
     def r(self, next_state, state, action):
         # TODO:
