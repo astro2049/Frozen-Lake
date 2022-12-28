@@ -1,5 +1,6 @@
-import numpy as np
 import contextlib
+
+import numpy as np
 
 
 # Configures numpy print options
@@ -92,14 +93,9 @@ class FrozenLake(Environment):
         self.absorbing_state = n_states - 1
 
         # TODO:
-        self.Hole_States = []
-        i = 0
-        while i <= len(self.lake_flat):
-            if self.lake_flat[i] == '#':
-                self.Hole_States.append(i)
-            i += 1
-        self.Goal_State = np.where(self.lake_flat == '$')
-        self.Start_State = np.where(self.lake_flat == '&')
+        self.hole_state = np.where(self.lake_flat == '#')
+        self.goal_state = np.where(self.lake_flat == '$')
+        self.start_state = np.where(self.lake_flat == '&')
 
         Environment.__init__(self, n_states, n_actions, max_steps, pi, seed=seed)
 
@@ -135,7 +131,7 @@ class FrozenLake(Environment):
 
     def r(self, next_state, state, action):
         # TODO:
-        if state == self.Goal_State(state):
+        if state == self.goal_state:
             return 1
         else:
             return 0
@@ -184,7 +180,7 @@ def play(env):
 
 
 def policy_evaluation(env, policy, gamma, theta, max_iterations):
-    value = np.zeros(env.n_states, dtype=np.float)
+    value = np.zeros(env.n_states, dtype=float)
 
     # TODO:
     # Loop until delta < theta or iteration < max iterations.
@@ -245,16 +241,16 @@ def policy_iteration(env, gamma, theta, max_iterations, policy=None):
     local_iterations = 0
     while local_iterations <= max_iterations:
         # Get new policy by getting q-values and maximizing q-values per state to get best action per state
-        New_Policy = env.policy_improvement(env, value, gamma)
+        new_policy = policy_improvement(env, value, gamma)
 
         # Get state values
-        value = env.policy_evaluation(env, policy, gamma, theta, max_iterations)
+        value = policy_evaluation(env, policy, gamma, theta, max_iterations)
 
         # Stop if the value function estimates for successive policies has converged
-        if np.array_equal(policy, New_Policy):
+        if np.array_equal(policy, new_policy):
             break
 
-        policy = New_Policy
+        policy = new_policy
 
         local_iterations += 1
 
@@ -293,11 +289,12 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
         local_iterations += 1
 
     # Extract policy with optimal state values
-    policy = env.policy_improvement(env, value, gamma)
+    policy = policy_improvement(env, value, gamma)
 
     return policy, value
 
 
+'''
 def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     random_state = np.random.RandomState(seed)
 
@@ -558,6 +555,7 @@ def deep_q_network_learning(env, max_episodes, learning_rate, gamma, epsilon,
             tdqn.load_state_dict(dqn.state_dict())
 
     return dqn
+'''
 
 
 def main():
@@ -598,6 +596,7 @@ def main():
 
     print('')
 
+    '''
     print('# Model-free algorithms')
     max_episodes = 4000
 
@@ -648,3 +647,8 @@ def main():
                                   fc_out_features=8, seed=4)
     policy, value = image_env.decode_policy(dqn)
     image_env.render(policy, value)
+    '''
+
+
+if __name__ == '__main__':
+    main()
