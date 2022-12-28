@@ -188,15 +188,15 @@ def policy_evaluation(env, policy, gamma, theta, max_iterations):
 
         # Loop through states
         for state in range(env.n_states):
-            v = value[state]
             action = policy[state]
+            state_value = value[state]
 
             # Sum of value
             for next_state in range(env.n_states):
                 value[state] = sum(
                     [env.p(next_state, state, action) * ((env.r(next_state, state, action)) + gamma * value[next_state])])
                 # Calculating delta
-                delta = max(delta, np.abs(value[state] - v))
+                delta = max(delta, np.abs(value[state] - state_value))
 
         # Stop policy evaluation if state values changes are smaller than theta
         if delta < theta:
