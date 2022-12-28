@@ -179,7 +179,7 @@ def play(env):
 
 
 def policy_evaluation(env, policy, gamma, theta, max_iterations):
-    V = np.zeros(env.n_states, dtype=float)
+    value = np.zeros(env.n_states, dtype=float)
 
     # TODO:
     # Loop until delta < theta or iteration < max iterations.
@@ -187,22 +187,22 @@ def policy_evaluation(env, policy, gamma, theta, max_iterations):
         delta = 0
 
         # Loop through states
-        for s in range(env.n_states):
-            v = V[s]
-            action = policy[s]
+        for state in range(env.n_states):
+            v = value[state]
+            action = policy[state]
 
             # Sum of value
-            for state_ in range(env.n_states):
-                V[s] = sum(
-                    [env.p(state_, s, action)] * (env.r(state_, s, action)) + gamma * V[state_])
+            for next_state in range(env.n_states):
+                value[state] = sum(
+                    [env.p(next_state, state, action) * ((env.r(next_state, state, action)) + gamma * value[next_state])])
                 # Calculating delta
-                delta = max(delta, np.abs(V[s] - v))
+                delta = max(delta, np.abs(value[state] - v))
 
         # Stop policy evaluation if state values changes are smaller than theta
         if delta < theta:
             break
 
-    return V
+    return value
 
 
 def policy_improvement(env, value, gamma):
@@ -216,9 +216,9 @@ def policy_improvement(env, value, gamma):
         # Each action
         for action in range(env.n_actions):
             # All possible next states from this state-action pair
-            for state_ in range(env.n_states):
+            for next_state in range(env.n_states):
                 policy_of_state[action] = sum(
-                    [env.p(state_, state, action)] * (env.r(state_, state, action)) + gamma * value[state_])
+                    [env.p(next_state, state, action) * (env.r(next_state, state, action) + gamma * value[next_state])])
                 # This state
         # Maximum policy
         policy[state] = policy_of_state.index(max(policy_of_state))
@@ -268,9 +268,9 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
             policy_of_state = np.zeros(env.n_actions).tolist()
             # New state value = max of q-value
             for action in range(env.n_actions):
-                for state_ in range(env.n_states):
+                for next_state in range(env.n_states):
                     policy_of_state[action] = sum(
-                        [env.p(state_, state, action)] * (env.r(state_, state, action)) + gamma * value[state_])
+                        [env.p(next_state, state, action)] * (env.r(next_state, state, action)) + gamma * value[next_state])
 
             value[state] = max(policy_of_state)
             # Calculating delta
