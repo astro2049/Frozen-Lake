@@ -91,11 +91,10 @@ class FrozenLake(Environment):
         pi[np.where(self.lake_flat == '&')[0]] = 1.0
 
         self.absorbing_state = n_states - 1
-
         # TODO:
-        self.hole_state = np.where(self.lake_flat == '#')
-        self.goal_state = np.where(self.lake_flat == '$')
-        self.start_state = np.where(self.lake_flat == '&')
+        self.hole_states = np.where(self.lake_flat == '#')
+        self.goal_state = 15
+        self.start_state = 0
 
         Environment.__init__(self, n_states, n_actions, max_steps, pi, seed=seed)
 
@@ -180,32 +179,30 @@ def play(env):
 
 
 def policy_evaluation(env, policy, gamma, theta, max_iterations):
-    value = np.zeros(env.n_states, dtype=float)
+    V = np.zeros(env.n_states, dtype=float)
 
     # TODO:
     # Loop until delta < theta or iteration < max iterations.
-    local_iterations = 0
-    while local_iterations <= max_iterations:
+    for i in range(max_iterations):
         delta = 0
 
         # Loop through states
-        for state in range(env.n_states):
-            action = policy[state]
-            State_Value = value[state]
+        for s in range(env.n_states):
+            v = V[s]
+            action = policy[s]
 
             # Sum of value
             for state_ in range(env.n_states):
-                value[state] = sum(
-                    [env.p(state_, state, action)] * (env.r(state_, state, action)) + gamma * value[state_])
+                V[s] = sum(
+                    [env.p(state_, s, action)] * (env.r(state_, s, action)) + gamma * V[state_])
                 # Calculating delta
-                delta = max(delta, np.abs(State_Value - value[state]))
+                delta = max(delta, np.abs(V[s] - v))
 
-        # Stop policy evaluation if state values changes are smaller than theta or itereations are greater than max iterations
+        # Stop policy evaluation if state values changes are smaller than theta
         if delta < theta:
             break
-        local_iterations += 1
 
-    return value
+    return V
 
 
 def policy_improvement(env, value, gamma):
@@ -214,17 +211,17 @@ def policy_improvement(env, value, gamma):
     # TODO:
     # Each state
     for state in range(env.n_states):
-        Policy_of_State = np.zeros(env.n_actions).tolist()
+        policy_of_state = np.zeros(env.n_actions).tolist()
 
         # Each action
         for action in range(env.n_actions):
             # All possible next states from this state-action pair
             for state_ in range(env.n_states):
-                Policy_of_State[action] = sum(
+                policy_of_state[action] = sum(
                     [env.p(state_, state, action)] * (env.r(state_, state, action)) + gamma * value[state_])
                 # This state
         # Maximum policy
-        policy[state] = Policy_of_State.index(max(Policy_of_State))
+        policy[state] = policy_of_state.index(max(policy_of_state))
     # Set new policy to this action that maximizes policy
 
     return policy
@@ -232,14 +229,13 @@ def policy_improvement(env, value, gamma):
 
 def policy_iteration(env, gamma, theta, max_iterations, policy=None):
     if policy is None:
-        policy = np.zeros(env.n_states, dtype=int)
+        policy = np.ones(env.n_states, dtype=int) / env.n_actions
     else:
         policy = np.array(policy, dtype=int)
 
     # TODO:
     value = np.zeros(env.n_states)
-    local_iterations = 0
-    while local_iterations <= max_iterations:
+    for i in range(max_iterations):
         # Get new policy by getting q-values and maximizing q-values per state to get best action per state
         new_policy = policy_improvement(env, value, gamma)
 
@@ -252,8 +248,6 @@ def policy_iteration(env, gamma, theta, max_iterations, policy=None):
 
         policy = new_policy
 
-        local_iterations += 1
-
     return policy, value
 
 
@@ -264,29 +258,27 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
         value = np.array(value, dtype=np.float)
 
     # TODO:
-    local_iterations = 0
-    while local_iterations <= max_iterations:
+    for i in range(max_iterations):
         delta = 0
 
         # Loop through each state
         for state in range(env.n_states):
             # Old state value
-            State_Value = value[state]
-            Policy_of_State = np.zeros(env.n_actions).tolist()
+            state_value = value[state]
+            policy_of_state = np.zeros(env.n_actions).tolist()
             # New state value = max of q-value
             for action in range(env.n_actions):
                 for state_ in range(env.n_states):
-                    Policy_of_State[action] = sum(
+                    policy_of_state[action] = sum(
                         [env.p(state_, state, action)] * (env.r(state_, state, action)) + gamma * value[state_])
 
-            value[state] = max(Policy_of_State)
+            value[state] = max(policy_of_state)
             # Calculating delta
-            delta = max(delta, abs(value[state] - State_Value))
+            delta = max(delta, abs(value[state] - state_value))
 
         # Stop if state values changes are smaller than theta or itereations are greater than max iterations
         if delta < theta:
             break
-        local_iterations += 1
 
     # Extract policy with optimal state values
     policy = policy_improvement(env, value, gamma)
