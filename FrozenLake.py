@@ -277,12 +277,12 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
         for state in range(env.n_states):
             # Old state value
             state_value = value[state]
-            policy_of_state = np.zeros(env.n_actions).tolist()
+            policy_of_state = np.zeros(env.n_actions)
             # New state value = max of q-value
             for action in range(env.n_actions):
-                for next_state in range(env.n_states):
-                    policy_of_state[action] = sum(
-                        [env.p(next_state, state, action)] * (env.r(next_state, state, action)) + gamma * value[next_state])
+                policy_of_state[action] = sum(
+                    [env.p(next_state, state, action) * (env.r(next_state, state, action) + gamma * value[next_state])
+                     for next_state in range(env.n_states)])
 
             value[state] = max(policy_of_state)
             # Calculating delta
