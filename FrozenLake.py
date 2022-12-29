@@ -242,18 +242,18 @@ def policy_improvement(env, value, gamma):
 
 def policy_iteration(env, gamma, theta, max_iterations, policy=None):
     if policy is None:
-        policy = np.ones(env.n_states, dtype=int) / env.n_actions
+        policy = np.zeros(env.n_states, dtype=int)
     else:
         policy = np.array(policy, dtype=int)
 
     # TODO:
     value = np.zeros(env.n_states)
     for i in range(max_iterations):
-        # Get new policy by getting q-values and maximizing q-values per state to get best action per state
-        new_policy = policy_improvement(env, value, gamma)
-
         # Get state values
         value = policy_evaluation(env, policy, gamma, theta, max_iterations)
+
+        # Get new policy by getting q-values and maximizing q-values per state to get best action per state
+        new_policy = policy_improvement(env, value, gamma)
 
         # Stop if the value function estimates for successive policies has converged
         if np.array_equal(policy, new_policy):
