@@ -195,6 +195,16 @@ def policy_evaluation(env, policy, gamma, theta, max_iterations):
     value = np.zeros(env.n_states, dtype=float)
 
     # TODO:
+    ''' 
+    References:
+    1) Lecture slides
+
+    2) Reinforcement learning 1: Policy iteration, value iteration and the Frozen Lake (2020) Jacob Higgins. 
+    Available at: https://jacobhiggins.github.io/posts/2020/06/blog-post-1/
+
+    3) Ng, R. Dynamic Programming, Dynamic Programming - Deep Learning Wizard. 
+    Available at: https://www.deeplearningwizard.com/deep_learning/deep_reinforcement_learning_pytorch/dynamic_programming_frozenlake/
+    '''
     # Loop until delta < theta or iteration < max iterations.
     for i in range(max_iterations):
         delta = 0
@@ -222,6 +232,16 @@ def policy_improvement(env, value, gamma):
     policy = np.zeros(env.n_states, dtype=int)
 
     # TODO:
+    ''' 
+    References:
+    1) Lecture slides
+
+    2) Reinforcement learning 1: Policy iteration, value iteration and the Frozen Lake (2020) Jacob Higgins. 
+    Available at: https://jacobhiggins.github.io/posts/2020/06/blog-post-1/
+    
+    3) Ng, R. Dynamic Programming, Dynamic Programming - Deep Learning Wizard. 
+    Available at: https://www.deeplearningwizard.com/deep_learning/deep_reinforcement_learning_pytorch/dynamic_programming_frozenlake/
+    '''
     # Each state
     for state in range(env.n_states):
         policy_of_state = np.zeros(env.n_actions)
@@ -234,6 +254,7 @@ def policy_improvement(env, value, gamma):
                  for next_state in range(env.n_states)])
 
         # Maximum policy
+        # Set new policy that maximizes policy
         policy[state] = np.argmax(policy_of_state)
 
     return policy
@@ -246,6 +267,16 @@ def policy_iteration(env, gamma, theta, max_iterations, policy=None):
         policy = np.array(policy, dtype=int)
 
     # TODO:
+    ''' 
+    References:
+    1) Lecture slides
+
+    2) Reinforcement learning 1: Policy iteration, value iteration and the Frozen Lake (2020) Jacob Higgins. 
+    Available at: https://jacobhiggins.github.io/posts/2020/06/blog-post-1/
+    
+    3) Ng, R. Dynamic Programming, Dynamic Programming - Deep Learning Wizard. 
+    Available at: https://www.deeplearningwizard.com/deep_learning/deep_reinforcement_learning_pytorch/dynamic_programming_frozenlake/
+    '''
     value = np.zeros(env.n_states)
     for i in range(max_iterations):
         # Get state values
@@ -270,6 +301,16 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
         value = np.array(value, dtype=np.float)
 
     # TODO:
+    ''' 
+    References:
+    1) Lecture slides
+
+    2) Reinforcement learning 1: Policy iteration, value iteration and the Frozen Lake (2020) Jacob Higgins. 
+    Available at: https://jacobhiggins.github.io/posts/2020/06/blog-post-1/
+    
+    3) Ng, R. Dynamic Programming, Dynamic Programming - Deep Learning Wizard. 
+    Available at: https://www.deeplearningwizard.com/deep_learning/deep_reinforcement_learning_pytorch/dynamic_programming_frozenlake/
+    '''
     for i in range(max_iterations):
         delta = 0
 
