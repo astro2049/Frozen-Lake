@@ -365,7 +365,7 @@ def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     for i in range(max_episodes):
         stateS = env.reset()
         actionList=q[stateS:]
-        actionaA=epsilonGreedyAlgo(epsilon[i], actionList)
+        actionA=epsilonGreedyAlgo(epsilon[i], actionList)
         '''
         if (np.random.uniform(0,1))<epsilon:
             actionaA= np.random(0,4)
@@ -376,7 +376,7 @@ def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
         '''
         done=False
         while not done:
-            ns,reward,done=env.step(actionaA)
+            ns,reward,done=env.step(actionA)
            
             na=epsilonGreedyAlgo(epsilon[i],q[ns])
             '''
@@ -386,9 +386,9 @@ def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
                 maxActionsList=np.argmax(actionList)
                 na= maxActionsList[np.random(0,maxActionsList.size)]
             '''
-            q[stateS, actionaA]=q[stateS,actionaA]+eta[i]*(reward+gamma*(q[ns,na])-q[stateS,actionaA])
+            q[stateS, actionA]=q[stateS,actionA]+eta[i]*(reward+gamma*(q[ns,na])-q[stateS,actionA])
             stateS=ns
-            actionaA=na
+            actionA=na
        
    
     policy = q.argmax(axis=1)
@@ -410,14 +410,14 @@ def q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
         actionList=q[stateS:]
         #a=epsilonGreedyAlgo(epsilon, actionList)
         if (np.random.uniform(0,1))<epsilon[i]:
-            actionaA= np.random(0,4)
+            actionA= np.random(0,4)
            
         else:
             maxActionsList=np.argmax(actionList)
-            actionaA= maxActionsList[np.random(0,maxActionsList.size)]
+            actionA= maxActionsList[np.random(0,maxActionsList.size)]
         done=False
         while not done:
-            ns,reward,done=env.step(actionaA)
+            ns,reward,done=env.step(actionA)
            
             #na=epsilonGreedyAlgo(epsilon,env,q[ns])
             if (np.random.uniform(0,1))<epsilon[i]:
@@ -425,9 +425,9 @@ def q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
             else:
                 maxActionsList=np.argmax(actionList)
                 na= maxActionsList[np.random(0,maxActionsList.size)]
-            q[stateS, actionaA]=q[stateS,actionaA]+eta[i]*(reward+gamma*(np.argmax(q[ns]))-q[stateS,actionaA])
+            q[stateS, actionA]=q[stateS,actionA]+eta[i]*(reward+gamma*(np.argmax(q[ns]))-q[stateS,actionA])
             stateS=ns
-            actionaA=na
+            actionA=na
         # TODO:
  
     policy = q.argmax(axis=1)
@@ -435,7 +435,7 @@ def q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
  
     return policy, value
 
-'''
+
 class LinearWrapper:
     def __init__(self, env):
         self.env = env
@@ -479,38 +479,121 @@ class LinearWrapper:
 
 def linear_sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     random_state = np.random.RandomState(seed)
-
     eta = np.linspace(eta, 0, max_episodes)
     epsilon = np.linspace(epsilon, 0, max_episodes)
-
+    gamma_decay = np.linspace(gamma, 0, max_episodes)
     theta = np.zeros(env.n_features)
+    ''' 
+    References:
+    1) Lecture slides
+
+    2) Artificial Intelligence 2E, SARSA with Linear Function Approximation. 
+    Available at: https://artint.info/2e/html/ArtInt2e.Ch12.S9.SS1.html. 
+    
+    3) Ofyildirim, Reinforcement-learning: A repo for reinforcement learning algorithms, GitHub. 
+    Available at: https://github.com/ofyildirim/reinforcement-learning. 
+    '''
 
     for i in range(max_episodes):
-        features = env.reset()
-
-        q = features.dot(theta)
-
         # TODO:
+        e = np.zeros(env.n_features)
+        ft = env.reset()
+        q = ft.dot(theta)
+        
+        action_random = random_state.choice(env.n_actions) 
+        action_greedy = np.argmax(q)
+        if random_state.uniform(0, 1) < epsilon[i]:
+            action = action_random
+        else: 
+            action = action_greedy
 
+        done = False
+        while not done:
+            e = (gamma_decay[i] * e) + ft[action]
+            ft_dash, reward, done = env.step(action)
+            delta = reward - q[action]
+            q = ft_dash.dot(theta)
+            action_random = random_state.choice(env.n_actions) 
+            action_greedy = np.argmax(q)
+            
+            #New variables' value
+            if random_state.uniform(0, 1) < epsilon[i]:
+                action_dash = action_random
+            else: 
+                action_dash = action_greedy
+
+            delta = delta + gamma * q[action_dash]
+            theta = theta + (eta[i] * delta * e)
+            action = action_dash
+            ft = ft_dash
+    print(i)
     return theta
 
 
 def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
     random_state = np.random.RandomState(seed)
-
     eta = np.linspace(eta, 0, max_episodes)
     epsilon = np.linspace(epsilon, 0, max_episodes)
+    gamma_decay = np.linspace(gamma, 0, max_episodes)
+    theta = np.zeros((env.n_features,env.n_actions))
+    ''' 
+    References:
+    1) Lecture slides
 
-    theta = np.zeros(env.n_features)
+    2) Understanding Q-learning and linear function approximation, Seita's Place. 
+    Available at: https://danieltakeshi.github.io/2016/10/31/going-deeper-into-reinforcement-learning-understanding-q-learning-and-linear-function-approximation/. 
+    
+    3) Ofyildirim, Reinforcement-learning: A repo for reinforcement learning algorithms, GitHub. 
+    Available at: https://github.com/ofyildirim/reinforcement-learning. 
+    '''
 
     for i in range(max_episodes):
-        features = env.reset()
-
         # TODO:
+        e = np.zeros(env.n_features)
+        ft = env.reset()
+        q = ft.dot(theta)
+        
+        action_random = random_state.choice(env.n_actions) 
+        action_greedy = np.argmax(q)
+        if random_state.uniform(0, 1) < epsilon[i]:
+            action = action_random
+        else: 
+            action = action_greedy
 
+        done = False
+        while not done:
+            ft_dash, reward, done = env.step(action)
+            delta = reward - q[action]
+
+            q = ft_dash.dot(theta)
+            action_random = random_state.choice(env.n_actions) 
+            action_greedy = np.argmax(q)
+            if random_state.uniform(0, 1) < epsilon[i]:
+                action_dash = action_random
+            else: 
+                action_dash = action_greedy
+
+            list_action_greedy = np.array(np.where(q == np.max(q))).flatten()
+            if(np.isin(action_dash, list_action_greedy)):
+                action_star = action_dash
+            else:
+                action_star = random_state.choice(list_action_greedy)
+
+            #New variables' value    
+            e = 1.0 * e + ft[action]
+            delta = delta + gamma * q[action_star]
+            theta = theta + (eta[i] * delta * e)
+            if(action_dash == action_star):
+                e = (gamma_decay[i] * e)
+            else:
+                e = np.zeros(env.n_features)
+
+            action = action_dash
+            ft = ft_dash
+           
     return theta
 
-
+'''
 class FrozenLakeImageWrapper:
     def __init__(self, env):
         self.env = env
@@ -711,7 +794,7 @@ def main():
     policy, value = sarsa(env, max_episodes, eta=0.5, gamma=gamma,
                           epsilon=0.5, seed=seed)
     env.render(policy, value)
-'''
+
     print('')
 
     print('## Q-learning')
@@ -741,6 +824,7 @@ def main():
 
     print('')
 
+    '''
     image_env = FrozenLakeImageWrapper(env)
 
     print('## Deep Q-network learning')
