@@ -339,41 +339,40 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
     return policy, value
 
 
-
 def epsilonGreedyAlgo(epsilon, currentActionValues):
     if (np.random.uniform(0,1))<epsilon:
         return np.random(0,4)
     else:
-       
+        
         maxActionsList=np.argmax(currentActionValues)
         return maxActionsList[np.random(0,maxActionsList.size)]
-       
+        
         #return np.argmax(currentActionValues)
- 
- 
- 
+
+
+
 def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     random_state = np.random.RandomState(seed)
- 
+
     eta = np.linspace(eta, 0, max_episodes)
     #epsilon = np.linspace(epsilon, 0, max_episodes)
- 
+
     q = np.zeros((env.n_states, env.n_actions))
- 
+
     for i in range(max_episodes):
         stateS = env.reset()
         actionList=q[stateS:]
         #a=epsilonGreedyAlgo(epsilon, actionList)
         if (np.random.uniform(0,1))<epsilon:
             actionaA= np.random(0,4)
-           
+            
         else:
             maxActionsList=np.argmax(actionList)
             actionaA= maxActionsList[np.random(0,maxActionsList.size)]
         done=False
         while not env.done:
             ns,reward,done=env.step(actionaA)
-           
+            
             #na=epsilonGreedyAlgo(epsilon,env,q[ns])
             if (np.random.uniform(0,1))<epsilon:
                 na= np.random(0,4)
@@ -383,36 +382,36 @@ def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
             q[stateS, actionaA]=q[stateS,actionaA]+eta(reward+gamma(q[ns,na])-q[stateS,actionaA])
             stateS=ns
             a=na
-       
-   
+        
+    
     policy = q.argmax(axis=1)
     value = q.max(axis=1)
- 
+
     return policy, value
- 
- 
+
+
 def q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
     random_state = np.random.RandomState(seed)
- 
+
     eta = np.linspace(eta, 0, max_episodes)
     epsilon = np.linspace(epsilon, 0, max_episodes)
- 
+
     q = np.zeros((env.n_states, env.n_actions))
- 
+
     for i in range(max_episodes):
         stateS = env.reset()
         actionList=q[stateS:]
         #a=epsilonGreedyAlgo(epsilon, actionList)
         if (np.random.uniform(0,1))<epsilon:
             actionaA= np.random(0,4)
-           
+            
         else:
             maxActionsList=np.argmax(actionList)
             actionaA= maxActionsList[np.random(0,maxActionsList.size)]
         done=False
         while not env.done:
             ns,reward,done=env.step(actionaA)
-           
+            
             #na=epsilonGreedyAlgo(epsilon,env,q[ns])
             if (np.random.uniform(0,1))<epsilon:
                 na= np.random(0,4)
@@ -423,13 +422,15 @@ def q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
             stateS=ns
             a=na
         # TODO:
- 
+
     policy = q.argmax(axis=1)
     value = q.max(axis=1)
- 
+
     return policy, value
 
 
+
+'''
 class LinearWrapper:
     def __init__(self, env):
         self.env = env
@@ -694,6 +695,11 @@ def main():
     env.render(policy, value)
 
     print('')
+    max_episodes = 4000
+    print('## Sarsa')
+    policy, value = sarsa(env, max_episodes, eta=0.5, gamma=gamma,
+                          epsilon=0.5, seed=seed)
+    env.render(policy, value)
 
     '''
     print('# Model-free algorithms')
