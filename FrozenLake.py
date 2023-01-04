@@ -479,7 +479,6 @@ def linear_sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     random_state = np.random.RandomState(seed)
     eta = np.linspace(eta, 0, max_episodes)
     epsilon = np.linspace(epsilon, 0, max_episodes)
-    gamma_decay = np.linspace(gamma, 0, max_episodes)
     theta = np.zeros(env.n_features)
     ''' 
     References:
@@ -493,38 +492,26 @@ def linear_sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     '''
 
     for i in range(max_episodes):
-        # TODO:
         e = np.zeros(env.n_features)
-        ft = env.reset()
-        q = ft.dot(theta)
-        
-        action_random = random_state.choice(env.n_actions) 
-        action_greedy = np.argmax(q)
-        if random_state.uniform(0, 1) < epsilon[i]:
-            action = action_random
-        else: 
-            action = action_greedy
+        features = env.reset()
+        q = features.dot(theta)
+        # TODO:
+        action = epsilonGreedyFunction(random_state, env, q, epsilon[i])
 
         done = False
         while not done:
-            e = (gamma_decay[i] * e) + ft[action]
-            ft_dash, reward, done = env.step(action)
+            e = (gamma * e) + features[action]
+            features_dash, reward, done = env.step(action)
             delta = reward - q[action]
-            q = ft_dash.dot(theta)
-            action_random = random_state.choice(env.n_actions) 
-            action_greedy = np.argmax(q)
+            q = features_dash.dot(theta)
+            action_dash = epsilonGreedyFunction(random_state, env, q, epsilon[i])
             
-            #New variables' value
-            if random_state.uniform(0, 1) < epsilon[i]:
-                action_dash = action_random
-            else: 
-                action_dash = action_greedy
-
+            # Update variable's value
             delta = delta + gamma * q[action_dash]
             theta = theta + (eta[i] * delta * e)
             action = action_dash
-            ft = ft_dash
-    print(i)
+            features = features_dash
+
     return theta
 
 
@@ -532,8 +519,8 @@ def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
     random_state = np.random.RandomState(seed)
     eta = np.linspace(eta, 0, max_episodes)
     epsilon = np.linspace(epsilon, 0, max_episodes)
+    theta = np.zeros(env.n_features)
     gamma_decay = np.linspace(gamma, 0, max_episodes)
-    theta = np.zeros((env.n_features,env.n_actions))
     ''' 
     References:
     1) Lecture slides
@@ -546,50 +533,50 @@ def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
     '''
 
     for i in range(max_episodes):
-        # TODO:
         e = np.zeros(env.n_features)
-        ft = env.reset()
-        q = ft.dot(theta)
-        
-        action_random = random_state.choice(env.n_actions) 
-        action_greedy = np.argmax(q)
-        if random_state.uniform(0, 1) < epsilon[i]:
-            action = action_random
-        else: 
-            action = action_greedy
+        features = env.reset()
+        q = features.dot(theta)
+        # TODO:
+        action = epsilonGreedyFunction(random_state, env, q, epsilon[i])
 
         done = False
         while not done:
-            ft_dash, reward, done = env.step(action)
+            features_dash, reward, done = env.step(action)
             delta = reward - q[action]
+            q = features_dash.dot(theta)
+            action_dash = epsilonGreedyFunction(random_state, env, q, epsilon[i])
+            q_value_max = np.max(q)
+            list_greedy_action = np.array(np.where(q == q_value_max)).flatten()
 
-            q = ft_dash.dot(theta)
-            action_random = random_state.choice(env.n_actions) 
-            action_greedy = np.argmax(q)
-            if random_state.uniform(0, 1) < epsilon[i]:
-                action_dash = action_random
-            else: 
-                action_dash = action_greedy
-
-            list_action_greedy = np.array(np.where(q == np.max(q))).flatten()
-            if(np.isin(action_dash, list_action_greedy)):
+            if(np.isin(action_dash, list_greedy_action)):
                 action_star = action_dash
             else:
-                action_star = random_state.choice(list_action_greedy)
-
-            #New variables' value    
-            e = 1.0 * e + ft[action]
+                action_star = random_state.choice(list_greedy_action)
+            
+            e = e + features[action]
+            # Update variable's value
             delta = delta + gamma * q[action_star]
             theta = theta + (eta[i] * delta * e)
+
             if(action_dash == action_star):
                 e = (gamma_decay[i] * e)
             else:
                 e = np.zeros(env.n_features)
 
             action = action_dash
-            ft = ft_dash
+            features = features_dash
            
-    return theta
+    return theta 
+
+def epsilonGreedyFunction(random_state, env, q, epsilon):
+    action_random = random_state.choice(env.n_actions) 
+    list_greedy_action = np.array(np.where(q == np.max(q))).flatten()
+    action_greedy = random_state.choice(list_greedy_action)
+
+    if random_state.uniform(0, 1) < epsilon:
+        return action_random
+    else:
+        return action_greedy
 
 '''
 class FrozenLakeImageWrapper:
@@ -787,7 +774,7 @@ def main():
     max_episodes = 4000
 
     print('')
-
+    '''
     print('## Sarsa')
     policy, value = sarsa(env, max_episodes, eta=0.5, gamma=gamma,
                           epsilon=0.5, seed=seed)
@@ -801,6 +788,7 @@ def main():
     env.render(policy, value)
 
     print('')
+    '''    
 
     linear_env = LinearWrapper(env)
 
