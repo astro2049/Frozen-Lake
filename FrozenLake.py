@@ -1,6 +1,7 @@
 import contextlib
 
 import numpy as np
+import random
 
 
 # Configures numpy print options
@@ -341,12 +342,14 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
 
 
 def epsilonGreedyAlgo(epsilon, currentActionValues):
-    if (np.random.uniform(0,1))<epsilon:
-        return np.random(0,4)
+    if (random.uniform(0,1))<epsilon:
+        return random.randint(0,4)
     else:
-       
         maxActionsList=np.argmax(currentActionValues)
-        return maxActionsList[np.random(0,maxActionsList.size)]
+        if maxActionsList.size>1:
+            return maxActionsList[random.randint(0,maxActionsList.size-2)]
+        else:
+            return maxActionsList
        
         #return np.argmax(currentActionValues)
  
@@ -363,23 +366,27 @@ def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     for i in range(max_episodes):
         stateS = env.reset()
         actionList=q[stateS:]
-        #a=epsilonGreedyAlgo(epsilon, actionList)
+        actionaA=epsilonGreedyAlgo(epsilon, actionList)
+        '''
         if (np.random.uniform(0,1))<epsilon:
             actionaA= np.random(0,4)
            
         else:
             maxActionsList=np.argmax(actionList)
             actionaA= maxActionsList[np.random(0,maxActionsList.size)]
+        '''
         done=False
-        while not env.done:
+        while not done:
             ns,reward,done=env.step(actionaA)
            
-            #na=epsilonGreedyAlgo(epsilon,env,q[ns])
+            na=epsilonGreedyAlgo(epsilon,q[ns])
+            '''
             if (np.random.uniform(0,1))<epsilon:
                 na= np.random(0,4)
             else:
                 maxActionsList=np.argmax(actionList)
                 na= maxActionsList[np.random(0,maxActionsList.size)]
+            '''
             q[stateS, actionaA]=q[stateS,actionaA]+eta(reward+gamma(q[ns,na])-q[stateS,actionaA])
             stateS=ns
             a=na
@@ -429,7 +436,7 @@ def q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
  
     return policy, value
 
-
+'''
 class LinearWrapper:
     def __init__(self, env):
         self.env = env
@@ -695,7 +702,7 @@ def main():
 
     print('')
 
-    '''
+    
     print('# Model-free algorithms')
     max_episodes = 4000
 
@@ -705,7 +712,7 @@ def main():
     policy, value = sarsa(env, max_episodes, eta=0.5, gamma=gamma,
                           epsilon=0.5, seed=seed)
     env.render(policy, value)
-
+'''
     print('')
 
     print('## Q-learning')
