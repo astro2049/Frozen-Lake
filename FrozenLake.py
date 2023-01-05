@@ -761,19 +761,19 @@ def main():
     max_episodes = 4000
 
     print('')
-    '''
+    
     print('## Sarsa')
-    policy, value = sarsa(env, max_episodes, eta=0.9, gamma=gamma,
+    policy, value = sarsa(env, max_episodes, eta=0.5, gamma=gamma,
                           epsilon=0.5, seed=seed)
     env.render(policy, value)
-'''
+
     print('')
 
     print('## Q-learning')
     policy, value = q_learning(env, max_episodes, eta=0.5, gamma=gamma,
-                               epsilon=0.9, seed=seed)
+                               epsilon=0.5, seed=seed)
     env.render(policy, value)
-'''
+
     print('')
        
 
@@ -797,7 +797,7 @@ def main():
 
     print('')
 
-    
+    '''
     image_env = FrozenLakeImageWrapper(env)
 
     print('## Deep Q-network learning')
