@@ -280,10 +280,10 @@ def policy_iteration(env, gamma, theta, max_iterations, policy=None):
         # Get state values
         value = policy_evaluation(env, policy, gamma, theta, max_iterations)
 
-        # Get new policy by getting q-values and maximizing q-values per state to get best action per state
+        # To create new policy, obtain q-values, and maximise q-values for each state to produce the best possible action
         new_policy = policy_improvement(env, value, gamma)
 
-        # Stop if the value function estimates for successive policies has converged
+        # If successive policy estimates for the value function converge, stop
         if np.array_equal(policy, new_policy):
             break
 
@@ -327,11 +327,11 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
             # Calculating delta
             delta = max(delta, abs(value[state] - state_value))
 
-        # Stop if state values changes are smaller than theta or itereations are greater than max iterations
+        # If state values changes are smaller than theta or itereations are greater than max iterations, stop
         if delta < theta:
             break
 
-    # Extract policy with optimal state values
+    # Select policy with optimal state values
     policy = policy_improvement(env, value, gamma)
 
     return policy, value
@@ -493,7 +493,7 @@ def linear_sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
             q = features_dash.dot(theta)
             action_dash = epsilonGreedyFunction(random_state, env, q, epsilon[i])
             
-            # Update variable's value
+            # Update variables' value
             delta = delta + gamma * q[action_dash]
             theta = theta + (eta[i] * delta * e)
             action = action_dash
@@ -533,6 +533,7 @@ def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
             q = features_dash.dot(theta)
             action_dash = epsilonGreedyFunction(random_state, env, q, epsilon[i])
             q_value_max = np.max(q)
+            # Get max value
             list_greedy_action = np.array(np.where(q == q_value_max)).flatten()
 
             if(np.isin(action_dash, list_greedy_action)):
@@ -541,7 +542,7 @@ def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
                 action_star = random_state.choice(list_greedy_action)
             
             e = e + features[action]
-            # Update variable's value
+            # Update variables' value
             delta = delta + gamma * q[action_star]
             theta = theta + (eta[i] * delta * e)
 
@@ -556,13 +557,24 @@ def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
     return theta 
 
 def epsilonGreedyFunction(random_state, env, q, epsilon):
-    action_random = random_state.choice(env.n_actions) 
-    list_greedy_action = np.array(np.where(q == np.max(q))).flatten()
-    action_greedy = random_state.choice(list_greedy_action)
+    ''' 
+    References:
+    1) Lecture slides
 
+    2) Roberts, S. The Epsilon-Greedy Algorithm (ε-Greedy), Medium. Towards Data Science.
+    Available at: https://towardsdatascience.com/bandit-algorithms-34fd7890cb18.
+    '''
+    action_random = random_state.choice(env.n_actions) 
+    # Get max value
+    list_greedy_action = np.array(np.where(q == np.max(q))).flatten()
+    # Get random action from the list
+    action_greedy = random_state.choice(list_greedy_action)
+    
     if random_state.uniform(0, 1) < epsilon:
+        # Number is smaller than epsilon then select a random no. for exploration
         return action_random
     else:
+        # Number is greater than epsilon then select the current highest value for exploitation
         return action_greedy
 
 '''
