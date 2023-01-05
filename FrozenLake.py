@@ -338,20 +338,24 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
 
 
 
-def epsilonGreedyAlgo(epsilon, currentActionValues):
+def epsilonGreedyAlgo(epsilon, currentActionValues, env):
+    #Decide wether to choose exploration or exploitation.
+    #random number < epsilon --- chose Random number --- Exploration
+    #random number > epsilon --- Choose current highest values --- Exploitation
     if (random.uniform(0,1))<epsilon:
-        return random.randint(0,4)
+        x=random.randint(0,env.n_actions-1)
+        return x
     else:
-        maxActionsList=np.argmax(currentActionValues)
+        #get Maximum value indices from the array
+        maxActionsList=np.argwhere(currentActionValues==np.max(currentActionValues))
         if maxActionsList.size>1:
-            return maxActionsList[random.randint(0,maxActionsList.size-2)]
+            #Choose random index to make sure all maximum values are treated equally
+            return maxActionsList[random.randint(0,maxActionsList.size-1)]
         else:
-            return maxActionsList
-       
-        #return np.argmax(currentActionValues)
- 
- 
- 
+            return int(maxActionsList)
+        #return np.argmax(currentActionValues)'''
+
+
 def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     random_state = np.random.RandomState(seed)
  
@@ -362,31 +366,18 @@ def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
  
     for i in range(max_episodes):
         stateS = env.reset()
-        actionList=q[stateS:]
-        actionA=epsilonGreedyAlgo(epsilon[i], actionList)
-        '''
-        if (np.random.uniform(0,1))<epsilon:
-            actionaA= np.random(0,4)
-           
-        else:
-            maxActionsList=np.argmax(actionList)
-            actionaA= maxActionsList[np.random(0,maxActionsList.size)]
-        '''
+        actionValueList=q[stateS]
+        actionA=epsilonGreedyAlgo(epsilon[i], actionValueList, env)
         done=False
         while not done:
             ns,reward,done=env.step(actionA)
            
-            na=epsilonGreedyAlgo(epsilon[i],q[ns])
-            '''
-            if (np.random.uniform(0,1))<epsilon:
-                na= np.random(0,4)
-            else:
-                maxActionsList=np.argmax(actionList)
-                na= maxActionsList[np.random(0,maxActionsList.size)]
-            '''
-            q[stateS, actionA]=q[stateS,actionA]+eta[i]*(reward+gamma*(q[ns,na])-q[stateS,actionA])
+            na=epsilonGreedyAlgo(epsilon[i],q[ns], env)
+            q[stateS, actionA]=q[stateS,actionA]+(eta[i]*(reward+(gamma*(q[ns,na]))-q[stateS,actionA]))
             stateS=ns
             actionA=na
+            
+
        
    
     policy = q.argmax(axis=1)
@@ -405,25 +396,21 @@ def q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
  
     for i in range(max_episodes):
         stateS = env.reset()
-        actionList=q[stateS:]
-        #a=epsilonGreedyAlgo(epsilon, actionList)
-        if (np.random.uniform(0,1))<epsilon[i]:
-            actionA= np.random(0,4)
-           
-        else:
-            maxActionsList=np.argmax(actionList)
-            actionA= maxActionsList[np.random(0,maxActionsList.size)]
+        actionList=q[stateS]
+        actionA=epsilonGreedyAlgo(epsilon[i], actionList, env)
         done=False
         while not done:
             ns,reward,done=env.step(actionA)
-           
-            #na=epsilonGreedyAlgo(epsilon,env,q[ns])
-            if (np.random.uniform(0,1))<epsilon[i]:
-                na= np.random(0,4)
+            na=epsilonGreedyAlgo(epsilon[i],q[ns],env)
+
+            maxActionsList=np.argwhere(q[ns]==np.max(q[ns]))
+            if maxActionsList.size>1:
+                #Choose random index to make sure all maximum values are treated equally
+                maxNextAction= maxActionsList[random.randint(0,maxActionsList.size-1)]
             else:
-                maxActionsList=np.argmax(actionList)
-                na= maxActionsList[np.random(0,maxActionsList.size)]
-            q[stateS, actionA]=q[stateS,actionA]+eta[i]*(reward+gamma*(np.argmax(q[ns]))-q[stateS,actionA])
+                maxNextAction= int(maxActionsList)
+
+            q[stateS, actionA]=q[stateS,actionA]+eta[i]*(reward+gamma*(q[ns,maxNextAction])-q[stateS,actionA])
             stateS=ns
             actionA=na
         # TODO:
@@ -776,19 +763,19 @@ def main():
     print('')
     '''
     print('## Sarsa')
-    policy, value = sarsa(env, max_episodes, eta=0.5, gamma=gamma,
+    policy, value = sarsa(env, max_episodes, eta=0.9, gamma=gamma,
                           epsilon=0.5, seed=seed)
     env.render(policy, value)
-
+'''
     print('')
 
     print('## Q-learning')
     policy, value = q_learning(env, max_episodes, eta=0.5, gamma=gamma,
-                               epsilon=0.5, seed=seed)
+                               epsilon=0.9, seed=seed)
     env.render(policy, value)
-
+'''
     print('')
-    '''    
+       
 
     linear_env = LinearWrapper(env)
 
@@ -810,7 +797,7 @@ def main():
 
     print('')
 
-    '''
+    
     image_env = FrozenLakeImageWrapper(env)
 
     print('## Deep Q-network learning')
