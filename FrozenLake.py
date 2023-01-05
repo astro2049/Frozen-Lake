@@ -610,7 +610,7 @@ def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
     plt.xlabel("Episode Number", fontdict = font_axis)
     plt.ylabel("Average Value", fontdict = font_axis)
     plt.plot(np.arange(1, len(graph_plot) + 1), graph_plot)
-    plt.savefig('Graphs/Linear_Q_Learning.png')     
+    plt.savefig('Graphs/Linear_Q-Learning_Plot.png')     
            
     return theta 
 
