@@ -1,4 +1,5 @@
 import contextlib
+from matplotlib import pyplot as plt
 import numpy as np
 import random
 
@@ -288,7 +289,7 @@ def policy_iteration(env, gamma, theta, max_iterations, policy=None):
             break
 
         policy = new_policy
-
+    print ("Iterations: ", i)
     return policy, value
 
 
@@ -333,7 +334,7 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
 
     # Select policy with optimal state values
     policy = policy_improvement(env, value, gamma)
-
+    print ("Iterations: ", i)
     return policy, value
 
 
@@ -363,7 +364,9 @@ def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     epsilon = np.linspace(epsilon, 0, max_episodes)
  
     q = np.zeros((env.n_states, env.n_actions))
- 
+
+    # Array to store rewards
+    reward_store_array = []
     for i in range(max_episodes):
         stateS = env.reset()
         actionValueList=q[stateS]
@@ -376,10 +379,20 @@ def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
             q[stateS, actionA]=q[stateS,actionA]+(eta[i]*(reward+(gamma*(q[ns,na]))-q[stateS,actionA]))
             stateS=ns
             actionA=na
-            
+        # Storing reward    
+        reward_store_array = reward_store_array + [q.max(axis=1).mean()] 
 
+    # Plotting graph
+    graph_plot = np.convolve(reward_store_array, np.ones(20)/20, mode='valid')
+    plt.clf()
+    font_head = {'family':'Times New Roman','color':'black','size':20}
+    font_axis = {'family':'Times New Roman','color':'black','size':15}
+    plt.title("Sarsa", fontdict = font_head)
+    plt.xlabel("Episode Number", fontdict = font_axis)
+    plt.ylabel("Average Value", fontdict = font_axis)
+    plt.plot(np.arange(1, len(graph_plot) + 1), graph_plot)
+    plt.savefig('Graphs/Sarsa_Plot.png')
        
-   
     policy = q.argmax(axis=1)
     value = q.max(axis=1)
  
@@ -393,7 +406,9 @@ def q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
     epsilon = np.linspace(epsilon, 0, max_episodes)
  
     q = np.zeros((env.n_states, env.n_actions))
- 
+
+    # Array to store rewards
+    reward_store_array = []
     for i in range(max_episodes):
         stateS = env.reset()
         actionList=q[stateS]
@@ -413,8 +428,21 @@ def q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
             q[stateS, actionA]=q[stateS,actionA]+eta[i]*(reward+gamma*(q[ns,maxNextAction])-q[stateS,actionA])
             stateS=ns
             actionA=na
-        # TODO:
+
+        # Storing reward    
+        reward_store_array = reward_store_array + [q.max(axis=1).mean()] 
  
+    # Plotting graph
+    graph_plot = np.convolve(reward_store_array, np.ones(20)/20, mode='valid')
+    plt.clf()
+    font_head = {'family':'Times New Roman','color':'black','size':20}
+    font_axis = {'family':'Times New Roman','color':'black','size':15}
+    plt.title("Q-Learning", fontdict = font_head)
+    plt.xlabel("Episode Number", fontdict = font_axis)
+    plt.ylabel("Average Value", fontdict = font_axis)
+    plt.plot(np.arange(1, len(graph_plot) + 1), graph_plot)
+    plt.savefig('Graphs/Q-Learning_Plot.png')
+
     policy = q.argmax(axis=1)
     value = q.max(axis=1)
  
@@ -477,7 +505,8 @@ def linear_sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
     3) Ofyildirim, Reinforcement-learning: A repo for reinforcement learning algorithms, GitHub. 
     Available at: https://github.com/ofyildirim/reinforcement-learning. 
     '''
-
+    # Array to store rewards
+    reward_store_array = []
     for i in range(max_episodes):
         e = np.zeros(env.n_features)
         features = env.reset()
@@ -499,6 +528,20 @@ def linear_sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
             action = action_dash
             features = features_dash
 
+        # Storing reward    
+        reward_store_array = reward_store_array + [env.decode_policy(theta)[1].mean()]
+
+    # Plotting graph
+    graph_plot = np.convolve(reward_store_array, np.ones(20)/20, mode='valid')
+    plt.clf()
+    font_head = {'family':'Times New Roman','color':'black','size':20}
+    font_axis = {'family':'Times New Roman','color':'black','size':15}
+    plt.title("Linear Sarsa", fontdict = font_head)
+    plt.xlabel("Episode Number", fontdict = font_axis)
+    plt.ylabel("Average Value", fontdict = font_axis)
+    plt.plot(np.arange(1, len(graph_plot) + 1), graph_plot)
+    plt.savefig('Graphs/Linear_Sarsa_Plot.png')
+
     return theta
 
 
@@ -518,7 +561,8 @@ def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
     3) Ofyildirim, Reinforcement-learning: A repo for reinforcement learning algorithms, GitHub. 
     Available at: https://github.com/ofyildirim/reinforcement-learning. 
     '''
-
+    # Array to store rewards
+    reward_store_array = []
     for i in range(max_episodes):
         e = np.zeros(env.n_features)
         features = env.reset()
@@ -553,6 +597,20 @@ def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
 
             action = action_dash
             features = features_dash
+
+        # Storing reward    
+        reward_store_array = reward_store_array + [env.decode_policy(theta)[1].mean()]   
+
+    # Plotting graph
+    graph_plot = np.convolve(reward_store_array, np.ones(20)/20, mode='valid')
+    plt.clf()
+    font_head = {'family':'Times New Roman','color':'black','size':20}
+    font_axis = {'family':'Times New Roman','color':'black','size':15}
+    plt.title("Linear Q-Learning", fontdict = font_head)
+    plt.xlabel("Episode Number", fontdict = font_axis)
+    plt.ylabel("Average Value", fontdict = font_axis)
+    plt.plot(np.arange(1, len(graph_plot) + 1), graph_plot)
+    plt.savefig('Graphs/Linear_Q_Learning.png')     
            
     return theta 
 
