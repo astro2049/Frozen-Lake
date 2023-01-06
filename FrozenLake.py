@@ -220,7 +220,7 @@ def policy_evaluation(env, policy, gamma, theta, max_iterations):
             # Calculating delta
             delta = max(delta, np.abs(value[state] - state_value))
 
-        # Stop policy evaluation if state values changes are smaller than theta
+        # If state values changes are smaller than theta, stop policy evaluation
         if delta < theta:
             break
 
@@ -380,7 +380,7 @@ def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
             stateS=ns
             actionA=na
         # Storing reward    
-        reward_store_array = reward_store_array + [q.max(axis=1).mean()] 
+        reward_store_array = reward_store_array + [np.mean(q.max(axis=1))] 
 
     # Plotting graph
     graph_plot = np.convolve(reward_store_array, np.ones(20)/20, mode='valid')
@@ -430,7 +430,7 @@ def q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
             actionA=na
 
         # Storing reward    
-        reward_store_array = reward_store_array + [q.max(axis=1).mean()] 
+        reward_store_array = reward_store_array + [np.mean(q.max(axis=1))] 
  
     # Plotting graph
     graph_plot = np.convolve(reward_store_array, np.ones(20)/20, mode='valid')
@@ -529,7 +529,7 @@ def linear_sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
             features = features_dash
 
         # Storing reward    
-        reward_store_array = reward_store_array + [env.decode_policy(theta)[1].mean()]
+        reward_store_array = reward_store_array + [np.mean(env.decode_policy(theta)[1])]
 
     # Plotting graph
     graph_plot = np.convolve(reward_store_array, np.ones(20)/20, mode='valid')
@@ -599,7 +599,7 @@ def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
             features = features_dash
 
         # Storing reward    
-        reward_store_array = reward_store_array + [env.decode_policy(theta)[1].mean()]   
+        reward_store_array = reward_store_array + [np.mean(env.decode_policy(theta)[1])]   
 
     # Plotting graph
     graph_plot = np.convolve(reward_store_array, np.ones(20)/20, mode='valid')
