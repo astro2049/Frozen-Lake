@@ -649,7 +649,9 @@ class FrozenLakeImageWrapper:
         self.env = env
 
         lake = self.env.lake
+        print("Lake:")
         print(lake)
+        print('')
 
         self.n_actions = self.env.n_actions
         self.state_shape = (4, lake.shape[0], lake.shape[1])
@@ -816,9 +818,11 @@ def deep_q_network_learning(env, max_episodes, learning_rate, gamma, epsilon,
 
     epsilon = np.linspace(epsilon, 0, max_episodes)
 
+    reward_store_array = []
+
     for i in range(max_episodes):
         state = env.reset()
-
+        return_rewards = 0
         done = False
         while not done:
             if random_state.rand() < epsilon[i]:
@@ -843,6 +847,21 @@ def deep_q_network_learning(env, max_episodes, learning_rate, gamma, epsilon,
 
         if (i % target_update_frequency) == 0:
             tdqn.load_state_dict(dqn.state_dict())
+
+        # Storing reward    
+            return_rewards = return_rewards + (gamma**env.env.n_steps) * reward
+        reward_store_array.append(return_rewards)
+
+    # Plotting graph
+    graph_plot = np.convolve(reward_store_array, np.ones(20)/20, mode='valid')
+    plt.clf()
+    font_head = {'family':'Times New Roman','color':'black','size':20}
+    font_axis = {'family':'Times New Roman','color':'black','size':15}
+    plt.title("Deep Q-Network Learning", fontdict = font_head)
+    plt.xlabel("Episode Number", fontdict = font_axis)
+    plt.ylabel("Average Value", fontdict = font_axis)
+    plt.plot(np.arange(1, len(graph_plot) + 1), graph_plot)
+    plt.savefig('Graphs/Deep_Q-Network_Learning_Plot.png')
 
     return dqn
 
@@ -937,7 +956,7 @@ def main():
                                   fc_out_features=8, seed=4)
     policy, value = image_env.decode_policy(dqn)
     image_env.render(policy, value)
-    '''
+    
 
 
 if __name__ == '__main__':
