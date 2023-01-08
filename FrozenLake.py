@@ -374,6 +374,7 @@ def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
         actionValueList=q[stateS]
         actionA=epsilonGreedyAlgo(epsilon[i], actionValueList, env)
         done=False
+        return_rewards = 0
         while not done:
             ns,reward,done=env.step(actionA)
            
@@ -381,8 +382,9 @@ def sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
             q[stateS, actionA]=q[stateS,actionA]+(eta[i]*(reward+(gamma*(q[ns,na]))-q[stateS,actionA]))
             stateS=ns
             actionA=na
-        # Storing reward    
-        reward_store_array = reward_store_array + [np.mean(q.max(axis=1))] 
+            # Storing reward    
+            return_rewards = return_rewards + (gamma**env.n_steps) * reward
+        reward_store_array.append(return_rewards)
 
     # Plotting graph
     graph_plot = np.convolve(reward_store_array, np.ones(20)/20, mode='valid')
@@ -415,6 +417,7 @@ def q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
         stateS = env.reset()
         actionList=q[stateS]
         actionA=epsilonGreedyAlgo(epsilon[i], actionList, env)
+        return_rewards = 0
         done=False
         while not done:
             ns,reward,done=env.step(actionA)
@@ -432,7 +435,8 @@ def q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
             actionA=na
 
         # Storing reward    
-        reward_store_array = reward_store_array + [np.mean(q.max(axis=1))] 
+            return_rewards = return_rewards + (gamma**env.n_steps) * reward
+        reward_store_array.append(return_rewards)
  
     # Plotting graph
     graph_plot = np.convolve(reward_store_array, np.ones(20)/20, mode='valid')
@@ -515,7 +519,7 @@ def linear_sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
         q = features.dot(theta)
         # TODO:
         action = epsilonGreedyFunction(random_state, env, q, epsilon[i])
-
+        return_rewards = 0
         done = False
         while not done:
             e = (gamma * e) + features[action]
@@ -531,7 +535,8 @@ def linear_sarsa(env, max_episodes, eta, gamma, epsilon, seed=None):
             features = features_dash
 
         # Storing reward    
-        reward_store_array = reward_store_array + [np.mean(env.decode_policy(theta)[1])]
+            return_rewards = return_rewards + (gamma**env.env.n_steps) * reward
+        reward_store_array.append(return_rewards)
 
     # Plotting graph
     graph_plot = np.convolve(reward_store_array, np.ones(20)/20, mode='valid')
@@ -571,7 +576,7 @@ def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
         q = features.dot(theta)
         # TODO:
         action = epsilonGreedyFunction(random_state, env, q, epsilon[i])
-
+        return_rewards = 0
         done = False
         while not done:
             features_dash, reward, done = env.step(action)
@@ -601,7 +606,8 @@ def linear_q_learning(env, max_episodes, eta, gamma, epsilon, seed=None):
             features = features_dash
 
         # Storing reward    
-        reward_store_array = reward_store_array + [np.mean(env.decode_policy(theta)[1])]   
+            return_rewards = return_rewards + (gamma**env.env.n_steps) * reward
+        reward_store_array.append(return_rewards)  
 
     # Plotting graph
     graph_plot = np.convolve(reward_store_array, np.ones(20)/20, mode='valid')
@@ -871,7 +877,7 @@ def main():
     max_episodes = 4000
     
     print('')
-    '''
+    
     print('## Sarsa')
     policy, value = sarsa(env, max_episodes, eta=0.5, gamma=gamma,
                           epsilon=0.5, seed=seed)
@@ -918,7 +924,7 @@ def main():
                                   fc_out_features=8, seed=4)
     policy, value = image_env.decode_policy(dqn)
     image_env.render(policy, value)
-    
+    '''
 
 
 if __name__ == '__main__':
