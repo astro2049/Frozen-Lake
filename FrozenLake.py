@@ -2,6 +2,8 @@ import contextlib
 from matplotlib import pyplot as plt
 import numpy as np
 import random
+import torch
+import collections
 
 
 # Configures numpy print options
@@ -341,8 +343,8 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
 
 def epsilonGreedyAlgo(epsilon, currentActionValues, env):
     #Decide wether to choose exploration or exploitation.
-    #random number < epsilon --- chose Random number --- Exploration
-    #random number > epsilon --- Choose current highest values --- Exploitation
+    #random number < epsilon --- chose Random number --- Probablity of Exploration
+    #random number > epsilon --- Choose current highest values --- probablity of Exploitation
     if (random.uniform(0,1))<epsilon:
         x=random.randint(0,env.n_actions-1)
         return x
@@ -622,7 +624,7 @@ def epsilonGreedyFunction(random_state, env, q, epsilon):
     2) Roberts, S. The Epsilon-Greedy Algorithm (ε-Greedy), Medium. Towards Data Science.
     Available at: https://towardsdatascience.com/bandit-algorithms-34fd7890cb18.
     '''
-    action_random = random_state.choice(env.n_actions) 
+    action_random = random_state.choice(env.n_actions)
     # Get max value
     list_greedy_action = np.array(np.where(q == np.max(q))).flatten()
     # Get random action from the list
@@ -635,23 +637,47 @@ def epsilonGreedyFunction(random_state, env, q, epsilon):
         # Number is greater than epsilon then select the current highest value for exploitation
         return action_greedy
 
-'''
+
 class FrozenLakeImageWrapper:
     def __init__(self, env):
         self.env = env
 
         lake = self.env.lake
+        print(lake)
 
         self.n_actions = self.env.n_actions
         self.state_shape = (4, lake.shape[0], lake.shape[1])
 
         lake_image = [(lake == c).astype(float) for c in ['&', '#', '$']]
+        print(lake_image)
 
         self.state_image = {lake.absorbing_state:
                                 np.stack([np.zeros(lake.shape)] + lake_image)}
-        for state in range(lake.size):
+        #for state in range(lake.size):
+        #   for
+        stateImgSize=lake.size
+        i=0
+        ch2,ch3,ch4=np.zeros(lake.shape[0],lake.shape[1])
+        for i in range(lake.shape[0]):
+            for j in range (lake.shape[1]):
+                ch1=np.zeros(lake.shape[0],lake.shape[1])
+                ch1[i][j]=1
+                if(lake[i][j=='&']):
+                    ch2[i][j]=1
+                elif(lake[i][j]=='#'):
+                    ch3[i][j]=1
+                elif(lake[i][j]=='$'):
+                    ch4[i][j]=1
+                self.state_image[i]=np.array(ch1,ch2,ch3,ch4)
+                i=i+1
+        
+        print(self.state_image)
+
+
 
     # TODO:
+
+
 
     def encode_state(self, state):
         return self.state_image[state]
@@ -701,6 +727,11 @@ class DeepQNetwork(torch.nn.Module):
         x = torch.tensor(x, dtype=torch.float)
 
         # TODO:
+        out=torch.nn.functional.relu(self.conv_layer(x))
+        #out.flatten()
+        out=torch.nn.functional.relu(self.fc_layer(out))
+        out=self.output_layer(out)
+
 
     def train_step(self, transitions, gamma, tdqn):
         states = np.array([transition[0] for transition in transitions])
@@ -720,6 +751,10 @@ class DeepQNetwork(torch.nn.Module):
 
         # TODO: the loss is the mean squared error between `q` and `target`
         loss = 0
+        print(type(q))
+        np.double(q)
+        meanSquaredLoss=torch.nn.MSELoss()
+        loss=meanSquaredLoss(q,target)
 
         self.optimizer.zero_grad()
         loss.backward()
@@ -738,6 +773,14 @@ class ReplayBuffer:
         self.buffer.append(transition)
 
     def draw(self, batch_size):
+        batch=collections.deque()
+        for i in range(batch_size):
+            if batch:
+                batch.append=self.buffer[i]
+            else:
+                break
+            return batch
+
 
 
 # TODO:
@@ -785,7 +828,7 @@ def deep_q_network_learning(env, max_episodes, learning_rate, gamma, epsilon,
             tdqn.load_state_dict(dqn.state_dict())
 
     return dqn
-'''
+
 
 
 def main():
@@ -831,7 +874,7 @@ def main():
     max_episodes = 4000
 
     print('')
-    
+    '''
     print('## Sarsa')
     policy, value = sarsa(env, max_episodes, eta=0.5, gamma=gamma,
                           epsilon=0.5, seed=seed)
@@ -879,7 +922,7 @@ def main():
                                   fc_out_features=8, seed=4)
     policy, value = image_env.decode_policy(dqn)
     image_env.render(policy, value)
-    '''
+    
 
 
 if __name__ == '__main__':
