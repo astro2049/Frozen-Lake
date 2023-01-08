@@ -250,7 +250,7 @@ def policy_improvement(env, value, gamma):
 
         # Each action
         for action in range(env.n_actions):
-            # All possible next states from this state-action pair
+            # Each state that could occur after this pair of state-action
             policy_of_state[action] = sum(
                 [env.p(next_state, state, action) * (env.r(next_state, state, action) + gamma * value[next_state])
                  for next_state in range(env.n_states)])
