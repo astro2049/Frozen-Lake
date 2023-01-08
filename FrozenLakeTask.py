@@ -339,9 +339,9 @@ def value_iteration(env, gamma, theta, max_iterations, value=None):
     return policy, value
 
 
-def epsilonGreedyAlgo(epsilon, currentActionValues):
-    if (np.random.uniform(0,1))<epsilon:
-        return np.random(0,4)
+def epsilonGreedyAlgo(epsilon, env, currentActionValues):
+    if (np.random.uniform(0,env.n_actions))<epsilon:
+        return np.random(0,)
     else:
         
         maxActionsList=np.argmax(currentActionValues)

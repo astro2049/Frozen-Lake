@@ -651,25 +651,34 @@ class FrozenLakeImageWrapper:
         lake_image = [(lake == c).astype(float) for c in ['&', '#', '$']]
         print(lake_image)
 
-        self.state_image = {lake.absorbing_state:
+        self.state_image = {env.absorbing_state:
                                 np.stack([np.zeros(lake.shape)] + lake_image)}
         #for state in range(lake.size):
         #   for
         stateImgSize=lake.size
         i=0
-        ch2,ch3,ch4=np.zeros(lake.shape[0],lake.shape[1])
-        ch2[np.where(self.lake=='&')]=1
-        ch3[np.where(self.lake=='#')]=1
-        ch4[np.where(self.lake=='$')]=1
-        for i in range(lake.shape[0]):
-            for j in range (lake.shape[1]):
-                ch1=np.zeros(lake.shape[0],lake.shape[1])
-                ch1[i][j]=1
+        ch2=ch3=ch4=np.zeros((lake.shape[0],lake.shape[1]))
+        ch2[np.where(lake=='&')]=1
+        ch3[np.where(lake=='#')]=1
+        ch4[np.where(lake=='$')]=1
+        for k in range((lake.shape[0])):
+            for j in range ((lake.shape[1])):
+                print(i,j)
+                ch1=np.zeros((lake.shape[0],lake.shape[1]))
+                ch1[k][j]=1
                 
-                self.state_image[i]=np.array(ch1,ch2,ch3,ch4)
+                self.state_image[i]=np.array([ch1,ch2,ch3,ch4])
                 i=i+1
-        
         print(self.state_image)
+        '''
+        for state in range(lake.size):
+            ch1=np.zeros((lake.shape[0],lake.shape[1]))
+            ch1[state//lake.shape[1]][state%lake.shape[1]]=1
+            self.state_image[state]=np.array([ch1,ch2,ch3,ch4])
+        
+        print("State Image")
+        print(self.state_image[2])
+        '''
 
 
 
@@ -725,10 +734,14 @@ class DeepQNetwork(torch.nn.Module):
         x = torch.tensor(x, dtype=torch.float)
 
         # TODO:
-        out=torch.nn.functional.relu(self.conv_layer(x))
-        #out.flatten()
+        x=torch.nn.functional.relu(self.conv_layer(x))
+        
+        flat = torch.nn.Flatten()
+        out=flat(x)
+        
+        #print(out)
         out=torch.nn.functional.relu(self.fc_layer(out))
-        out=self.output_layer(out)
+        return self.output_layer(out)
 
 
     def train_step(self, transitions, gamma, tdqn):
@@ -750,7 +763,7 @@ class DeepQNetwork(torch.nn.Module):
         # TODO: the loss is the mean squared error between `q` and `target`
         loss = 0
         print(type(q))
-        np.double(q)
+        q = q.double()
         meanSquaredLoss=torch.nn.MSELoss()
         loss=meanSquaredLoss(q,target)
 
@@ -761,7 +774,7 @@ class DeepQNetwork(torch.nn.Module):
 
 class ReplayBuffer:
     def __init__(self, buffer_size, random_state):
-        self.buffer = deque(maxlen=buffer_size)
+        self.buffer = collections.deque(maxlen=buffer_size)
         self.random_state = random_state
 
     def __len__(self):
@@ -773,11 +786,11 @@ class ReplayBuffer:
     def draw(self, batch_size):
         batch=collections.deque()
         for i in range(batch_size):
-            if batch:
-                batch.append=self.buffer[i]
+            if len(self.buffer)>0:
+                batch.append(self.buffer.pop())
             else:
                 break
-            return batch
+        return batch
 
 
 
@@ -850,7 +863,7 @@ def main():
 
     env = FrozenLake(lake, slip=0.1, max_steps=16, seed=seed)
     gamma = 0.9
-    
+    '''
     print('# Model-based algorithms')
 
     print('')
@@ -869,9 +882,9 @@ def main():
 
     print('# Model-free algorithms')
     max_episodes = 4000
-    
+
     print('')
-    '''
+    
     print('## Sarsa')
     policy, value = sarsa(env, max_episodes, eta=0.5, gamma=gamma,
                           epsilon=0.5, seed=seed)
@@ -905,8 +918,8 @@ def main():
     linear_env.render(policy, value)
 
     print('')
-    
     '''
+    max_episodes = 4000
     image_env = FrozenLakeImageWrapper(env)
 
     print('## Deep Q-network learning')
