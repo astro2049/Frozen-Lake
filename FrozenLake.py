@@ -658,16 +658,14 @@ class FrozenLakeImageWrapper:
         stateImgSize=lake.size
         i=0
         ch2,ch3,ch4=np.zeros(lake.shape[0],lake.shape[1])
+        ch2[np.where(self.lake=='&')]=1
+        ch3[np.where(self.lake=='#')]=1
+        ch4[np.where(self.lake=='$')]=1
         for i in range(lake.shape[0]):
             for j in range (lake.shape[1]):
                 ch1=np.zeros(lake.shape[0],lake.shape[1])
                 ch1[i][j]=1
-                if(lake[i][j=='&']):
-                    ch2[i][j]=1
-                elif(lake[i][j]=='#'):
-                    ch3[i][j]=1
-                elif(lake[i][j]=='$'):
-                    ch4[i][j]=1
+                
                 self.state_image[i]=np.array(ch1,ch2,ch3,ch4)
                 i=i+1
         
