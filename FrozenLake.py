@@ -650,20 +650,17 @@ class FrozenLakeImageWrapper:
         self.env = env
 
         lake = self.env.lake
-        print("Lake:")
-        print(lake)
-        print('')
 
         self.n_actions = self.env.n_actions
         self.state_shape = (4, lake.shape[0], lake.shape[1])
 
         lake_image = [(lake == c).astype(float) for c in ['&', '#', '$']]
-        print(lake_image)
+        #print(lake_image)
 
         self.state_image = {env.absorbing_state:
                                 np.stack([np.zeros(lake.shape)] + lake_image)}
         #for state in range(lake.size):
-        #   for
+        #for
         stateImgSize=lake.size
         i=0
         ch2=ch3=ch4=np.zeros((lake.shape[0],lake.shape[1]))
@@ -672,18 +669,14 @@ class FrozenLakeImageWrapper:
         ch4[np.where(lake=='$')]=1
         for k in range((lake.shape[0])):
             for j in range ((lake.shape[1])):
-                print(i,j)
+                #print(i,j)
                 ch1=np.zeros((lake.shape[0],lake.shape[1]))
                 ch1[k][j]=1
                 
                 self.state_image[i]=np.array([ch1,ch2,ch3,ch4])
                 i=i+1
-        print(self.state_image)
-        
-
-
-
-    # TODO:
+        #print(self.state_image)
+        # TODO:
 
 
 
@@ -859,7 +852,6 @@ def deep_q_network_learning(env, max_episodes, learning_rate, gamma, epsilon,
     return dqn
 
 
-
 def main():
     seed = 0
 
@@ -881,7 +873,7 @@ def main():
 
     env = FrozenLake(lake, slip=0.1, max_steps=16, seed=seed)
     gamma = 0.9
-    '''
+    
     print('# Model-based algorithms')
 
     print('')
@@ -936,10 +928,10 @@ def main():
     linear_env.render(policy, value)
 
     print('')
-    '''
+    
     max_episodes = 4000
     image_env = FrozenLakeImageWrapper(env)
-
+    
     print('## Deep Q-network learning')
 
     dqn = deep_q_network_learning(image_env, max_episodes, learning_rate=0.001,
@@ -950,7 +942,5 @@ def main():
     policy, value = image_env.decode_policy(dqn)
     image_env.render(policy, value)
     
-
-
 if __name__ == '__main__':
     main()
