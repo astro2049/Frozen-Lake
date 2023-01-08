@@ -852,7 +852,7 @@ def main():
 
     env = FrozenLake(lake, slip=0.1, max_steps=16, seed=seed)
     gamma = 0.9
-
+    
     print('# Model-based algorithms')
 
     print('')
@@ -869,10 +869,9 @@ def main():
 
     print('')
 
-    
     print('# Model-free algorithms')
     max_episodes = 4000
-
+    
     print('')
     '''
     print('## Sarsa')
@@ -881,15 +880,14 @@ def main():
     env.render(policy, value)
 
     print('')
-
+    
     print('## Q-learning')
     policy, value = q_learning(env, max_episodes, eta=0.5, gamma=gamma,
                                epsilon=0.5, seed=seed)
     env.render(policy, value)
 
     print('')
-       
-
+      
     linear_env = LinearWrapper(env)
 
     print('## Linear Sarsa')
@@ -909,7 +907,7 @@ def main():
     linear_env.render(policy, value)
 
     print('')
-
+    
     '''
     image_env = FrozenLakeImageWrapper(env)
 
@@ -927,10 +925,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    # lake = [['&', '.', '.', '.'],
-    #         ['.', '#', '.', '#'],
-    #         ['.', '.', '.', '#'],
-    #         ['#', '.', '.', '$']]
-
-    # env = FrozenLake(lake, slip=0.1, max_steps=16, seed=0)
-    # play(env)
