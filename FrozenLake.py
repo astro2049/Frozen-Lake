@@ -803,7 +803,8 @@ def deep_q_network_learning(env, max_episodes, learning_rate, gamma, epsilon,
                         fc_out_features, seed=seed)
 
     epsilon = np.linspace(epsilon, 0, max_episodes)
-
+    
+    # Array to store rewards
     reward_store_array = []
 
     for i in range(max_episodes):
