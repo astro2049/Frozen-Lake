@@ -679,15 +679,7 @@ class FrozenLakeImageWrapper:
                 self.state_image[i]=np.array([ch1,ch2,ch3,ch4])
                 i=i+1
         print(self.state_image)
-        '''
-        for state in range(lake.size):
-            ch1=np.zeros((lake.shape[0],lake.shape[1]))
-            ch1[state//lake.shape[1]][state%lake.shape[1]]=1
-            self.state_image[state]=np.array([ch1,ch2,ch3,ch4])
         
-        print("State Image")
-        print(self.state_image[2])
-        '''
 
 
 
@@ -771,7 +763,7 @@ class DeepQNetwork(torch.nn.Module):
 
         # TODO: the loss is the mean squared error between `q` and `target`
         loss = 0
-        print(type(q))
+        #print(type(q))
         q = q.double()
         meanSquaredLoss=torch.nn.MSELoss()
         loss=meanSquaredLoss(q,target)
