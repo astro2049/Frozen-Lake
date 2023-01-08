@@ -95,8 +95,9 @@ class FrozenLake(Environment):
 
         self.absorbing_state = n_states - 1
         # TODO:
+        self.side_len = self.lake.shape[0]
         self.hole_states = np.where(self.lake_flat == '#')
-        self.goal_state = 15
+        self.goal_state = self.lake.size - 1
         self.start_state = 0
 
         Environment.__init__(self, n_states, n_actions, max_steps, pi, seed=seed)
@@ -115,27 +116,27 @@ class FrozenLake(Environment):
         else:
             val = 0
             slips = []
-            slips.append(state) if state - 4 < 0 else slips.append(state - 4)
-            slips.append(state) if state % 4 == 0 else slips.append(state - 1)
-            slips.append(state) if state + 4 > 15 else slips.append(state + 4)
-            slips.append(state) if state % 4 == 3 else slips.append(state + 1)
+            slips.append(state) if state - self.side_len < 0 else slips.append(state - self.side_len)
+            slips.append(state) if state % self.side_len == 0 else slips.append(state - 1)
+            slips.append(state) if state + self.side_len > self.goal_state else slips.append(state + self.side_len)
+            slips.append(state) if state % self.side_len == (self.side_len - 1) else slips.append(state + 1)
             for s in slips:
                 if next_state == s:
-                    val += self.slip / 4
+                    val += self.slip / self.side_len
 
             if action == 0:
-                state -= 4
+                state -= self.side_len
                 if state < 0:
-                    state += 4
+                    state += self.side_len
             elif action == 1:
-                if state % 4 != 0:
+                if state % self.side_len != 0:
                     state -= 1
             elif action == 2:
-                state += 4
-                if state > 15:
-                    state -= 4
+                state += self.side_len
+                if state > self.goal_state:
+                    state -= self.side_len
             elif action == 3:
-                if state % 4 != 3:
+                if state % self.side_len != (self.side_len - 1):
                     state += 1
             if next_state == state:
                 val += 1 - self.slip
