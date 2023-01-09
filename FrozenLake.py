@@ -122,7 +122,7 @@ class FrozenLake(Environment):
             slips.append(state) if state % self.side_len == (self.side_len - 1) else slips.append(state + 1)
             for s in slips:
                 if next_state == s:
-                    val += self.slip / self.side_len
+                    val += self.slip / 4
 
             if action == 0:
                 state -= self.side_len
